@@ -12,4 +12,15 @@ class R01_JustFrom {
             println("Got: $s")
         }
     }
+
+    @Test
+    fun shouldEmitValues() {
+        val obs = Flowable.just("A", "B", "C")
+
+        val subscriber = obs.test()
+
+        subscriber
+                .assertValues("A", "B", "C")
+                .assertComplete()
+    }
 }
