@@ -3,8 +3,11 @@ package io.github.gianpamx.rxkotlin
 import io.github.gianpamx.rxkotlin.util.Sleeper
 import io.reactivex.Observable
 import org.junit.Test
+import org.mockito.Mockito.*
 import org.slf4j.LoggerFactory
+import java.sql.SQLException
 import java.time.Duration
+import javax.sql.DataSource
 
 class R02_Create {
     private val log = LoggerFactory.getLogger(R02_Create::class.java)
@@ -49,5 +52,27 @@ class R02_Create {
         log.info("Subscribing")
         obs.subscribe()
         log.info("Result")
+    }
+
+    @Test
+    fun createLambdaIsInvokedManyTimes() {
+        val ds = mock(DataSource::class.java)
+
+        val obs = queryDatabase(ds)
+
+        obs.subscribe()
+        obs.subscribe()
+
+        verify(ds, times(2)).getConnection()
+    }
+
+    fun queryDatabase(ds: DataSource): Observable<Int> {
+        return Observable.create<Int> { sub ->
+            try {
+                ds.connection.use { conn -> sub.onComplete() }
+            } catch (e: SQLException) {
+                sub.onError(e)
+            }
+        }
     }
 }
