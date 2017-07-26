@@ -17,4 +17,18 @@ class R02_Create {
                 .assertValues("A", "B")
                 .assertComplete()
     }
+
+    @Test
+    fun sameThread() {
+        val curThreadName = Thread.currentThread().name
+
+        val obs = Observable.create<String> { sub ->
+            sub.onNext(Thread.currentThread().name)
+            sub.onComplete()
+        }
+
+        obs
+                .test()
+                .assertValue(curThreadName)
+    }
 }
