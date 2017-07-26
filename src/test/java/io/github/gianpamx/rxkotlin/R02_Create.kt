@@ -66,6 +66,19 @@ class R02_Create {
         verify(ds, times(2)).getConnection()
     }
 
+    @Test
+    fun cachingWhenCreateIsInvokedManyTimes() {
+        val ds = mock(DataSource::class.java)
+
+        val obs = queryDatabase(ds).cache()
+
+        obs.subscribe()
+        obs.subscribe()
+
+        verify(ds, times(1)).getConnection()
+    }
+
+
     fun queryDatabase(ds: DataSource): Observable<Int> {
         return Observable.create<Int> { sub ->
             try {
