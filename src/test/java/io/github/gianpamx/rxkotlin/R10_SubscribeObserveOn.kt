@@ -33,4 +33,20 @@ class R10_SubscribeObserveOn {
             BigDecimal.TEN
         }
     }
+
+    @Test
+    fun observeOn() {
+        slowFromCallable()
+                .subscribeOn(Schedulers.io())
+                .doOnNext { x -> log.info("A: {}", x) }
+                .observeOn(Schedulers.computation())
+                .doOnNext { x -> log.info("B: {}", x) }
+                .observeOn(Schedulers.newThread())
+                .doOnNext { x -> log.info("C: {}", x) }
+                .subscribe {
+                    x ->
+                    log.info("Got: {}", x)
+                }
+        Sleeper.sleep(ofMillis(1_100));
+    }
 }
