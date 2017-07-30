@@ -1,7 +1,10 @@
 package io.github.gianpamx.rxkotlin
 
-import io.github.gianpamx.rxkotlin.util.Sleeper
+import io.github.gianpamx.rxkotlin.util.Sleeper.sleep
+import io.github.gianpamx.rxkotlin.util.Threads.runInBackground
 import io.reactivex.Observable
+import io.reactivex.observers.TestObserver
+import org.awaitility.Awaitility.await
 import org.junit.Test
 import org.mockito.Mockito.*
 import org.slf4j.LoggerFactory
@@ -45,7 +48,7 @@ class R02_Create {
         log.info("Start")
         val obs = Observable.create<String> { sub ->
             log.info("In create()")
-            Sleeper.sleep(Duration.ofSeconds(2))
+            sleep(Duration.ofSeconds(2))
             sub.onComplete()
             log.info("Completed")
         }
@@ -87,5 +90,42 @@ class R02_Create {
                 sub.onError(e)
             }
         }
+    }
+
+    @Test
+    fun infiniteObservable() {
+        val obs = Observable.create<Int>({ sub ->
+            var i = 0
+            while (!sub.isDisposed) {
+                sub.onNext(i++)
+            }
+        })
+
+        val subscriber = obs
+                .skip(10)
+                .take(3)
+                .test()
+        subscriber
+                .assertValues(10, 11, 12)
+                .assertComplete()
+    }
+
+    @Test
+    fun infiniteObservableInBackground() {
+        val obs = Observable.create<Int> { sub ->
+            runInBackground(Runnable {
+                var i = 0
+                while (!sub.isDisposed) {
+                    sub.onNext(i++)
+                }
+            })
+        }
+
+        val subscriber = obs
+                .skip(10)
+                .take(3)
+                .test()
+
+        await().until({ subscriber.assertValues(10, 11, 12) } as () -> Unit)
     }
 }

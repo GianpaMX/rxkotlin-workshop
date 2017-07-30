@@ -25,4 +25,5 @@ dependencies {
     testCompile 'org.slf4j:slf4j-api:1.7.21'
 
     testCompile 'org.mockito:mockito-core:2.2.1'
+    testCompile 'org.awaitility:awaitility:2.0.0'
 }
