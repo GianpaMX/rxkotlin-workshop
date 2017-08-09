@@ -3,7 +3,6 @@ package io.github.gianpamx.rxkotlin
 import io.github.gianpamx.rxkotlin.util.Sleeper.sleep
 import io.github.gianpamx.rxkotlin.util.Threads.runInBackground
 import io.reactivex.Observable
-import io.reactivex.observers.TestObserver
 import org.awaitility.Awaitility.await
 import org.junit.Test
 import org.mockito.Mockito.*

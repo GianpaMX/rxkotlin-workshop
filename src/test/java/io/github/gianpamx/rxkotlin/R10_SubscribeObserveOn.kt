@@ -1,14 +1,18 @@
 package io.github.gianpamx.rxkotlin
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder
 import io.github.gianpamx.rxkotlin.util.Sleeper
 import io.reactivex.Flowable
 import io.reactivex.Scheduler
 import io.reactivex.schedulers.Schedulers
+import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.Awaitility.await
 import org.junit.Test
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.Duration.ofMillis
 import java.time.Duration.ofSeconds
+import java.util.concurrent.Executors
 
 class R10_SubscribeObserveOn {
     val log = LoggerFactory.getLogger(R10_SubscribeObserveOn::class.java)
@@ -48,5 +52,28 @@ class R10_SubscribeObserveOn {
                     log.info("Got: {}", x)
                 }
         Sleeper.sleep(ofMillis(1_100));
+    }
+
+    @Test
+    fun customExecutor() {
+        val subscriber = slowFromCallable()
+                .subscribeOn(myCustomScheduler())
+                .test()
+
+        await().until({
+            val lastThread = subscriber.lastThread()
+            assertThat(lastThread).isNotNull()
+            assertThat(lastThread.name).startsWith("CustomExecutor-")
+        } as () -> Unit)
+    }
+
+    private fun myCustomScheduler(): Scheduler {
+        val threadFactory = ThreadFactoryBuilder()
+                .setNameFormat("CustomExecutor-%d")
+                .build()
+
+        val executorService = Executors.newFixedThreadPool(10, threadFactory)
+
+        return Schedulers.from(executorService)
     }
 }
