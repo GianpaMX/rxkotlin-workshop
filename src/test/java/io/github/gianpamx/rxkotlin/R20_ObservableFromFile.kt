@@ -4,6 +4,7 @@ import io.github.gianpamx.rxkotlin.util.Urls
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import java.io.FileNotFoundException
+import java.net.URL
 
 class R20_ObservableFromFile {
     @Test
@@ -33,4 +34,23 @@ class R20_ObservableFromFile {
         assertThat(observer.errors().get(0)).hasMessage("john@gmail.com")
     }
 
+    @Test
+    fun shouldParseAllUrls() {
+        val all = Urls.all("urls.txt")
+
+        val list = all
+                .toList()
+                .blockingGet()
+
+        assertThat(list).hasSize(996)
+        assertThat(list).startsWith(
+                URL("http://www.google.com"),
+                URL("http://www.youtube.com"),
+                URL("http://www.facebook.com")
+        )
+        assertThat(list).endsWith(
+                URL("http://www.king.com"),
+                URL("http://www.virginmedia.com")
+        )
+    }
 }
