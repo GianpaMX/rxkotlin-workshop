@@ -22,4 +22,15 @@ class R20_ObservableFromFile {
 
         assertThat(observer.errors().get(0)).hasMessageContaining("urrrrrls.txt")
     }
+
+    @Test
+    fun shouldFailWhenBrokenFile() {
+        val all = Urls.all("urls_broken.txt")
+
+        val observer = all.test()
+
+        observer.assertError(IllegalArgumentException::class.java)
+        assertThat(observer.errors().get(0)).hasMessage("john@gmail.com")
+    }
+
 }

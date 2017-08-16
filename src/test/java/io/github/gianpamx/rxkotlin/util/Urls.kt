@@ -7,7 +7,6 @@ import java.io.InputStreamReader
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.util.stream.Collectors.toList
-import java.util.stream.Stream
 
 object Urls {
     fun all(): Flowable<URL> = all("urls.txt")
@@ -16,7 +15,13 @@ object Urls {
         load(filename)
     }
 
-    fun load(filename: String): Flowable<URL> = Flowable.fromIterable(classpathReaderOf(filename).lines().map<URL> { l -> URL(l) }.collect(toList()))
+    fun load(filename: String): Flowable<URL> = Flowable.fromIterable(classpathReaderOf(filename).lines().map<URL> { l ->
+        try {
+            URL(l)
+        } catch (e: Exception) {
+            throw IllegalArgumentException(l)
+        }
+    }.collect(toList()))
 
     fun classpathReaderOf(filename: String): BufferedReader = BufferedReader(InputStreamReader(openInputStream(filename), StandardCharsets.UTF_8))
 
